@@ -1,0 +1,51 @@
+type Query {
+    players: [Player!]!
+}
+
+type Mutation {
+    playerCreate(input: CreatePlayerInput!): CreatePlayerPayload
+    playerDelete(playerId: ID!): DeletePlayerPayload
+}
+
+interface Node {
+    # The ID of the object.
+    id: ID!
+}
+
+enum PlayerPosition {
+    POINT_GUARD
+    SHOOTING_GUARD
+    SMALL_FORWARD
+    POWER_FORWARD
+    CENTER
+}
+
+type Player implements Node {
+    id: ID!
+    name: String!
+    surname: String!
+    position: PlayerPosition!
+}
+
+input CreatePlayerInput {
+    name: String!
+    surname: String!
+    position: PlayerPosition!
+}
+
+type CreatePlayerPayload {
+    userErrors: [UserError!]!
+    player: Player
+}
+
+type DeletePlayerPayload {
+    userErrors: [UserError!]!
+    player: Player
+}
+
+type UserError {
+    message: String!
+
+    # Path to input field which caused the error.
+    field: [String!]
+}
