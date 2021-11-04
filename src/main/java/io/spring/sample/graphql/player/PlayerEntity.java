@@ -1,30 +1,36 @@
 package io.spring.sample.graphql.player;
 
-public class Player {
-    private String id;
+import javax.persistence.*;
+
+@Entity(name = "player")
+public class PlayerEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
     private String name;
+
     private String surname;
+
+    @Convert(converter = PlayerPositionConverter.class)
     private PlayerPosition position;
 
-    public Player(String id, String name, String surname, PlayerPosition position) {
+    public PlayerEntity() {
+    }
+
+    public PlayerEntity(int id, String name, String surname, PlayerPosition position) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.position = position;
     }
 
-    public Player(PlayerEntity entity) {
-        this.id = entity.getId() + "";
-        this.name = entity.getName();
-        this.surname = entity.getSurname();
-        this.position = entity.getPosition();
-    }
-
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

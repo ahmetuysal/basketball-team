@@ -5,8 +5,6 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
-
 @Controller
 public class PlayerController {
     private final PlayerService playerService;
@@ -16,7 +14,7 @@ public class PlayerController {
     }
 
     @QueryMapping
-    public List<Player> players() {
+    public Iterable<Player> players() {
         return this.playerService.getAllPlayers();
     }
 
