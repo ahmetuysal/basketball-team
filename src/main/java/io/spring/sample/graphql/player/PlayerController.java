@@ -28,7 +28,7 @@ public class PlayerController {
 
     @QueryMapping
     public Player player(@Argument("id") String id) {
-        return null;
+        return this.playerService.getPlayer(id);
     }
 
     @MutationMapping

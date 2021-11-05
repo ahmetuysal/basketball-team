@@ -13,13 +13,15 @@ import io.spring.sample.graphql.player.dto.Player;
 import io.spring.sample.graphql.player.exceptions.TeamCapacityIsFullException;
 import io.spring.sample.graphql.player.repository.PlayerEntity;
 import io.spring.sample.graphql.player.repository.PlayerRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PlayerService {
 
-    private static final long MAX_PLAYER_COUNT = 12L;
+    @Value( "${team.max-size}" )
+    private long maxTeamSize;
 
     private final PlayerRepository playerRepository;
 
@@ -47,8 +49,8 @@ public class PlayerService {
 
     public CreatePlayerPayload createPlayer(CreatePlayerInput input) {
         long playerCount = playerRepository.count();
-        if (playerCount >= MAX_PLAYER_COUNT) {
-            throw new TeamCapacityIsFullException(MAX_PLAYER_COUNT);
+        if (playerCount >= maxTeamSize) {
+            throw new TeamCapacityIsFullException(maxTeamSize);
         }
 
         PlayerEntity newPlayer = new PlayerEntity();
