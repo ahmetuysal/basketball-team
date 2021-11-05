@@ -3,6 +3,8 @@ package io.spring.sample.graphql.player.dto;
 import io.spring.sample.graphql.common.ResolvedGlobalId;
 import io.spring.sample.graphql.player.repository.PlayerEntity;
 
+import java.util.Objects;
+
 public class Player {
     private String id;
     private String name;
@@ -46,5 +48,28 @@ public class Player {
 
     public void setPosition(PlayerPosition position) {
         this.position = position;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return id.equals(player.id) && name.equals(player.name) && surname.equals(player.surname) && position == player.position;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, surname, position);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", position=" + position +
+                '}';
     }
 }

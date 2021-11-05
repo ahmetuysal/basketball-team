@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PlayerService {
 
-    @Value( "${team.max-size}" )
+    @Value("${team.max-size}")
     private long maxTeamSize;
 
     private final PlayerRepository playerRepository;
@@ -53,10 +53,8 @@ public class PlayerService {
             throw new TeamCapacityIsFullException(maxTeamSize);
         }
 
-        PlayerEntity newPlayer = new PlayerEntity();
-        newPlayer.setName(input.getName());
-        newPlayer.setSurname(input.getSurname());
-        newPlayer.setPosition(input.getPosition());
+        PlayerEntity newPlayer = new PlayerEntity(input.getName(),
+                input.getSurname(), input.getPosition());
 
         playerRepository.save(newPlayer);
 

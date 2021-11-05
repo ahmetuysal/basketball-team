@@ -14,6 +14,15 @@ public class CreatePlayerInput {
 
     private PlayerPosition position;
 
+    public CreatePlayerInput() {
+    }
+
+    public CreatePlayerInput(String name, String surname, PlayerPosition position) {
+        this.name = name;
+        this.surname = surname;
+        this.position = position;
+    }
+
     public String getName() {
         return name;
     }
