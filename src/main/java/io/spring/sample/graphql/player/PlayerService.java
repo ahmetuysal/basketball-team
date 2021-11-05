@@ -1,5 +1,6 @@
 package io.spring.sample.graphql.player;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -18,52 +19,71 @@ import org.springframework.stereotype.Component;
 @Component
 public class PlayerService {
 
-	private static final long MAX_PLAYER_COUNT = 2L;
+    private static final long MAX_PLAYER_COUNT = 12L;
 
-	private final PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
-	public PlayerService(PlayerRepository playerRepository) {
-		this.playerRepository = playerRepository;
-	}
+    public PlayerService(PlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
+    }
 
-	public Iterable<Player> getAllPlayers() {
-		return StreamSupport.stream(playerRepository.findAll().spliterator(), true)
-				.map(Player::new)
-				.collect(Collectors.toList());
-	}
+    public Player getPlayer(String playerOpaqueId) {
+        int playerDatabaseId = getDatabaseIdFromOpaqueId(playerOpaqueId);
 
-	public CreatePlayerPayload createPlayer(CreatePlayerInput input) {
-		long playerCount = playerRepository.count();
-		if (playerCount >= MAX_PLAYER_COUNT) {
-			throw new TeamCapacityIsFullException(MAX_PLAYER_COUNT);
-		}
+        Optional<PlayerEntity> playerEntity = playerRepository.findById(playerDatabaseId);
 
-		PlayerEntity newPlayer = new PlayerEntity();
-		newPlayer.setName(input.getName());
-		newPlayer.setSurname(input.getSurname());
-		newPlayer.setPosition(input.getPosition());
+        if (playerEntity.isEmpty()) {
+            throw new NotFoundException("Player", playerOpaqueId);
+        }
 
-		playerRepository.save(newPlayer);
+        return new Player(playerEntity.get());
+    }
 
-		return new CreatePlayerPayload(new Player(newPlayer), null);
-	}
+    public Iterable<Player> getAllPlayers() {
+        return StreamSupport.stream(playerRepository.findAll().spliterator(), true)
+                .map(Player::new)
+                .collect(Collectors.toList());
+    }
 
-	public DeletePlayerPayload deletePlayer(String playerOpaqueId) {
-		ResolvedGlobalId resolvedGlobalId = ResolvedGlobalId.fromGlobalId(playerOpaqueId);
-		if (!resolvedGlobalId.getType().equals("Player")) {
-			throw new NotFoundException("Player", playerOpaqueId);
-		}
+    public CreatePlayerPayload createPlayer(CreatePlayerInput input) {
+        long playerCount = playerRepository.count();
+        if (playerCount >= MAX_PLAYER_COUNT) {
+            throw new TeamCapacityIsFullException(MAX_PLAYER_COUNT);
+        }
 
-		try {
-			playerRepository.deleteById(Integer.parseInt(resolvedGlobalId.getId(), 10));
-		} catch (Exception e) {
-			System.out.println(e.toString());
-			if (e instanceof DataAccessException) {
-				throw new NotFoundException("Player", playerOpaqueId);
-			} else throw e;
-		}
+        PlayerEntity newPlayer = new PlayerEntity();
+        newPlayer.setName(input.getName());
+        newPlayer.setSurname(input.getSurname());
+        newPlayer.setPosition(input.getPosition());
 
-		return new DeletePlayerPayload(null);
-	}
+        playerRepository.save(newPlayer);
 
+        return new CreatePlayerPayload(new Player(newPlayer), null);
+    }
+
+    public DeletePlayerPayload deletePlayer(String playerOpaqueId) {
+        int playerDatabaseId = getDatabaseIdFromOpaqueId(playerOpaqueId);
+        try {
+            playerRepository.deleteById(playerDatabaseId);
+        } catch (Exception e) {
+            if (e instanceof DataAccessException) {
+                throw new NotFoundException("Player", playerOpaqueId);
+            } else throw e;
+        }
+
+        return new DeletePlayerPayload(null);
+    }
+
+
+    private static int getDatabaseIdFromOpaqueId(String playerOpaqueId) {
+        try {
+            ResolvedGlobalId resolvedGlobalId = ResolvedGlobalId.fromGlobalId(playerOpaqueId);
+            if (!resolvedGlobalId.getType().equals("Player")) {
+                throw new NotFoundException("Player", playerOpaqueId);
+            }
+            return Integer.parseInt(resolvedGlobalId.getId());
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Player", playerOpaqueId);
+        }
+    }
 }
