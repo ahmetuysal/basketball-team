@@ -2,6 +2,7 @@ package io.spring.sample.graphql.player;
 
 import io.spring.sample.graphql.player.dto.CreatePlayerInput;
 import io.spring.sample.graphql.player.dto.CreatePlayerPayload;
+import io.spring.sample.graphql.player.dto.DeletePlayerPayload;
 import io.spring.sample.graphql.player.dto.Player;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -34,4 +35,10 @@ public class PlayerController {
     public CreatePlayerPayload playerCreate(@Valid @Argument("input") CreatePlayerInput createPlayerInput) {
         return this.playerService.createPlayer(createPlayerInput);
     }
+
+    @MutationMapping
+    public DeletePlayerPayload playerDelete(@Valid @Argument("id") String id) {
+        return this.playerService.deletePlayer(id);
+    }
+
 }

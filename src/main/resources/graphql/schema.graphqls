@@ -5,7 +5,7 @@ type Query {
 
 type Mutation {
     playerCreate(input: CreatePlayerInput!): CreatePlayerPayload
-    playerDelete(playerId: ID!): DeletePlayerPayload
+    playerDelete(id: ID!): DeletePlayerPayload
 }
 
 interface Node {
@@ -41,7 +41,6 @@ type CreatePlayerPayload {
 
 type DeletePlayerPayload {
     userErrors: [UserError!]
-    player: Player
 }
 
 type UserError {

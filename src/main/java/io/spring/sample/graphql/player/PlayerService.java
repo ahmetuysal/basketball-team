@@ -3,12 +3,16 @@ package io.spring.sample.graphql.player;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import io.spring.sample.graphql.common.ResolvedGlobalId;
+import io.spring.sample.graphql.common.exceptions.NotFoundException;
 import io.spring.sample.graphql.player.dto.CreatePlayerInput;
 import io.spring.sample.graphql.player.dto.CreatePlayerPayload;
+import io.spring.sample.graphql.player.dto.DeletePlayerPayload;
 import io.spring.sample.graphql.player.dto.Player;
 import io.spring.sample.graphql.player.exceptions.TeamCapacityIsFullException;
 import io.spring.sample.graphql.player.repository.PlayerEntity;
 import io.spring.sample.graphql.player.repository.PlayerRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,6 +46,24 @@ public class PlayerService {
 		playerRepository.save(newPlayer);
 
 		return new CreatePlayerPayload(new Player(newPlayer), null);
+	}
+
+	public DeletePlayerPayload deletePlayer(String playerOpaqueId) {
+		ResolvedGlobalId resolvedGlobalId = ResolvedGlobalId.fromGlobalId(playerOpaqueId);
+		if (!resolvedGlobalId.getType().equals("Player")) {
+			throw new NotFoundException("Player", playerOpaqueId);
+		}
+
+		try {
+			playerRepository.deleteById(Integer.parseInt(resolvedGlobalId.getId(), 10));
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			if (e instanceof DataAccessException) {
+				throw new NotFoundException("Player", playerOpaqueId);
+			} else throw e;
+		}
+
+		return new DeletePlayerPayload(null);
 	}
 
 }
