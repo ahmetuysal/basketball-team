@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import io.spring.sample.graphql.common.ResolvedGlobalId;
 import io.spring.sample.graphql.common.exceptions.NotFoundException;
