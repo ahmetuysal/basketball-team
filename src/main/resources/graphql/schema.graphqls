@@ -1,5 +1,6 @@
 type Query {
     players: [Player!]!
+    player(id: ID!): Player
 }
 
 type Mutation {
@@ -34,12 +35,12 @@ input CreatePlayerInput {
 }
 
 type CreatePlayerPayload {
-    userErrors: [UserError!]!
+    userErrors: [UserError!]
     player: Player
 }
 
 type DeletePlayerPayload {
-    userErrors: [UserError!]!
+    userErrors: [UserError!]
     player: Player
 }
 

@@ -1,4 +1,4 @@
-package io.spring.sample.graphql.player;
+package io.spring.sample.graphql.player.repository;
 
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;

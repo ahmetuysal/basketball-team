@@ -1,4 +1,6 @@
-package io.spring.sample.graphql.player;
+package io.spring.sample.graphql.player.repository;
+
+import io.spring.sample.graphql.player.dto.PlayerPosition;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

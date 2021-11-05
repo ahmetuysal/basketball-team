@@ -1,4 +1,4 @@
-package io.spring.sample.graphql.player;
+package io.spring.sample.graphql.player.dto;
 
 public enum PlayerPosition {
     POINT_GUARD,
