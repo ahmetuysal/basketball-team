@@ -1,12 +1,14 @@
 package io.spring.sample.graphql.player;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import io.spring.sample.graphql.common.ResolvedGlobalId;
 import io.spring.sample.graphql.common.exceptions.NotFoundException;
-import io.spring.sample.graphql.player.dto.CreatePlayerInput;
-import io.spring.sample.graphql.player.dto.CreatePlayerPayload;
-import io.spring.sample.graphql.player.dto.Player;
-import io.spring.sample.graphql.player.dto.PlayerPosition;
+import io.spring.sample.graphql.player.dto.*;
 import io.spring.sample.graphql.player.exceptions.TeamCapacityIsFullException;
 import io.spring.sample.graphql.player.repository.PlayerEntity;
 import io.spring.sample.graphql.player.repository.PlayerRepository;
@@ -17,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,7 +34,7 @@ class PlayerServiceTest {
     @Mock
     private PlayerRepository playerRepository;
 
-    @Value( "${team.max-size}" )
+    @Value("${team.max-size}")
     private long maxTeamSize;
 
     @Test
@@ -60,7 +62,7 @@ class PlayerServiceTest {
                 playerService.getPlayer(userOpaqueId));
 
         // then
-        Mockito.verify(playerRepository,  Mockito.times(1))
+        Mockito.verify(playerRepository, Mockito.times(1))
                 .findById(userId);
     }
 
@@ -75,7 +77,7 @@ class PlayerServiceTest {
 
         // when
         assertThrows(TeamCapacityIsFullException.class, () ->
-                 playerService.createPlayer(input));
+                playerService.createPlayer(input));
 
         // then
         Mockito.verify(playerRepository, Mockito.never())
@@ -105,5 +107,77 @@ class PlayerServiceTest {
         Mockito.verify(playerRepository, Mockito.times(1))
                 .save(new PlayerEntity(input.getName(),
                         input.getSurname(), input.getPosition()));
+    }
+
+    @Test
+    void it_should_not_accept_global_id_of_different_type_on_delete_player() {
+        // given
+        String invalidGlobalId = ResolvedGlobalId.toGlobalId("User", "1");
+
+        // when
+        assertThrows(NotFoundException.class, () ->
+                playerService.deletePlayer(invalidGlobalId));
+
+        // then
+        Mockito.verifyNoInteractions(playerRepository);
+    }
+
+    @Test
+    void it_should_throw_not_found_if_player_with_id_does_not_exist_on_delete() {
+        // given
+        int userId = 15;
+        String userOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(userId));
+        doThrow(EmptyResultDataAccessException.class)
+                .when(playerRepository)
+                .deleteById(userId);
+
+        // when
+        assertThrows(NotFoundException.class, () ->
+                playerService.deletePlayer(userOpaqueId));
+
+        // then
+    }
+
+    @Test
+    void it_should_return_payload_on_successful_delete() {
+        // given
+        int userId = 15;
+        String userOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(userId));
+
+        // when
+        DeletePlayerPayload payload = playerService.deletePlayer(userOpaqueId);
+
+        // then
+        then(payload.getUserErrors()).isNull();
+    }
+
+    @Test
+    void it_should_return_empty_list_if_no_player_exist() {
+        // given
+        given(playerRepository.findAll()).willReturn(Collections.emptyList());
+        // when
+        List<Player> players = playerService.getAllPlayers();
+        // then
+        then(players.isEmpty()).isTrue();
+    }
+
+    @Test
+    void it_should_return_players() {
+        // given
+        List<PlayerEntity> playerEntities = Arrays.asList(
+                new PlayerEntity(1, "Allen", "Iverson", PlayerPosition.POINT_GUARD),
+                new PlayerEntity(2, "Shaquille", "O'Neal", PlayerPosition.CENTER),
+                new PlayerEntity(3, "Ray", "Allen", PlayerPosition.SHOOTING_GUARD),
+                new PlayerEntity(5, "Scottie", "Pippen", PlayerPosition.SMALL_FORWARD),
+                new PlayerEntity(7, "Ron", "Harper", PlayerPosition.POINT_GUARD),
+                new PlayerEntity(8, "John", "Salley", PlayerPosition.POWER_FORWARD));
+
+        given(playerRepository.findAll()).willReturn(playerEntities);
+        // when
+        List<Player> players = playerService.getAllPlayers();
+        // then
+        then(players.size()).isEqualTo(playerEntities.size());
+        then(players).containsExactly(
+                playerEntities.stream().map(Player::new).toArray(Player[]::new));
     }
 }

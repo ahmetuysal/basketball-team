@@ -1,5 +1,6 @@
 package io.spring.sample.graphql.player;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -41,7 +42,7 @@ public class PlayerService {
         return new Player(playerEntity.get());
     }
 
-    public Iterable<Player> getAllPlayers() {
+    public List<Player> getAllPlayers() {
         return StreamSupport.stream(playerRepository.findAll().spliterator(), true)
                 .map(Player::new)
                 .collect(Collectors.toList());
