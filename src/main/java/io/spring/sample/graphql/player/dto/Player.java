@@ -1,5 +1,6 @@
 package io.spring.sample.graphql.player.dto;
 
+import io.spring.sample.graphql.common.ResolvedGlobalId;
 import io.spring.sample.graphql.player.repository.PlayerEntity;
 
 public class Player {
@@ -8,15 +9,8 @@ public class Player {
     private String surname;
     private PlayerPosition position;
 
-    public Player(String id, String name, String surname, PlayerPosition position) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
-        this.position = position;
-    }
-
     public Player(PlayerEntity entity) {
-        this.id = entity.getId() + "";
+        this.id = ResolvedGlobalId.toGlobalId("Player", String.valueOf(entity.getId()));
         this.name = entity.getName();
         this.surname = entity.getSurname();
         this.position = entity.getPosition();
