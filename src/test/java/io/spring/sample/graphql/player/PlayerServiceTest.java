@@ -52,17 +52,34 @@ class PlayerServiceTest {
     @Test
     void it_should_throw_not_found_if_player_with_id_does_not_exist() {
         // given
-        int userId = 2;
-        String userOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(userId));
-        given(playerRepository.findById(userId)).willReturn(Optional.empty());
+        int playerId = 2;
+        String playerOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(playerId));
+        given(playerRepository.findById(playerId)).willReturn(Optional.empty());
 
         // when
         assertThrows(NotFoundException.class, () ->
-                playerService.getPlayer(userOpaqueId));
+                playerService.getPlayer(playerOpaqueId));
 
         // then
         Mockito.verify(playerRepository, Mockito.times(1))
-                .findById(userId);
+                .findById(playerId);
+    }
+
+    @Test
+    void it_should_return_player_with_id() {
+        // given
+        int playerId = 2;
+        String playerOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(playerId));
+        PlayerEntity entity = new PlayerEntity(playerId, "Mehmet", "Okur", PlayerPosition.CENTER);
+        given(playerRepository.findById(playerId)).willReturn(Optional.of(entity));
+
+        // when
+        Player player = playerService.getPlayer(playerOpaqueId);
+
+        // then
+        then(player).isEqualTo(new Player(entity));
+        Mockito.verify(playerRepository, Mockito.times(1))
+                .findById(playerId);
     }
 
     @Test
@@ -124,15 +141,15 @@ class PlayerServiceTest {
     @Test
     void it_should_throw_not_found_if_player_with_id_does_not_exist_on_delete() {
         // given
-        int userId = 15;
-        String userOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(userId));
+        int playerId = 15;
+        String playerOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(playerId));
         doThrow(EmptyResultDataAccessException.class)
                 .when(playerRepository)
-                .deleteById(userId);
+                .deleteById(playerId);
 
         // when
         assertThrows(NotFoundException.class, () ->
-                playerService.deletePlayer(userOpaqueId));
+                playerService.deletePlayer(playerOpaqueId));
 
         // then
     }
@@ -140,11 +157,11 @@ class PlayerServiceTest {
     @Test
     void it_should_return_payload_on_successful_delete() {
         // given
-        int userId = 15;
-        String userOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(userId));
+        int playerId = 15;
+        String playerOpaqueId = ResolvedGlobalId.toGlobalId("Player", String.valueOf(playerId));
 
         // when
-        DeletePlayerPayload payload = playerService.deletePlayer(userOpaqueId);
+        DeletePlayerPayload payload = playerService.deletePlayer(playerOpaqueId);
 
         // then
         then(payload.getUserErrors()).isNull();
