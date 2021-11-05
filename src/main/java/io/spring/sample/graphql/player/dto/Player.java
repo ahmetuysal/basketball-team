@@ -11,6 +11,9 @@ public class Player {
     private String surname;
     private PlayerPosition position;
 
+    public Player() {
+    }
+
     public Player(PlayerEntity entity) {
         this.id = ResolvedGlobalId.toGlobalId("Player", String.valueOf(entity.getId()));
         this.name = entity.getName();

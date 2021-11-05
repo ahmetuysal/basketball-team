@@ -1,0 +1,14 @@
+mutation CreatePlayer($name: String!, $surname: String!, $position: PlayerPosition!) {
+    playerCreate(input: { name: $name, surname: $surname, position: $position} ) {
+        player {
+            id
+            name
+            surname
+            position
+        }
+        userErrors {
+            message
+            field
+        }
+    }
+}
